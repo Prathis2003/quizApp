@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class Answer extends StatelessWidget {
+class Answer extends StatefulWidget {
   final questionAnswers;
   final incrementQuestionIndexFunction;
   final incrementScore;
@@ -10,22 +10,58 @@ class Answer extends StatelessWidget {
       this.incrementScore});
 
   @override
+  State<Answer> createState() => _AnswerState();
+}
+
+class _AnswerState extends State<Answer> {
+  bool isAnswerClicked = false;
+  String clickedAnswer = '';
+  @override
   Widget build(BuildContext context) {
     return Column(
-      children: (questionAnswers['Option'] as List)
+      children: (widget.questionAnswers['Option'] as List)
           .map(
             (e) => Container(
               width: double.infinity,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(primary: Colors.black),
                   onPressed: () {
-                    if (e == questionAnswers['Answer']) {
-                      incrementScore();
+                    if (isAnswerClicked == false) {
+                      setState(() {
+                        isAnswerClicked = true;
+                        clickedAnswer = e;
+                      });
+                      if (e == widget.questionAnswers['Answer']) {
+                        widget.incrementScore();
+                      }
+                      Future.delayed(Duration(seconds: 2), () {
+                        setState(() {
+                          isAnswerClicked = false;
+                          clickedAnswer = '';
+                        });
+                        widget.incrementQuestionIndexFunction();
+                      });
                     }
-                    incrementQuestionIndexFunction();
                   },
-                  child: Text(e.toString()),
+                  child: Row(
+                    children: [
+                      Text(e),
+                      SizedBox(width: 20),
+                      isAnswerClicked && e == widget.questionAnswers['Answer']
+                          ? Icon(
+                              Icons.check,
+                              color: Colors.green,
+                            )
+                          : Container(),
+                      isAnswerClicked &&
+                              e == clickedAnswer &&
+                              clickedAnswer != widget.questionAnswers['Answer']
+                          ? Icon(Icons.wrong_location, color: Colors.red)
+                          : Container()
+                    ],
+                  ),
                 ),
               ),
             ),
